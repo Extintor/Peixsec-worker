@@ -13,6 +13,6 @@ RUN tar -zxf master.tar.gz && \
 WORKDIR /root
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
-COPY peixsec/peixsec.py peixsec.py
+COPY peixsec_worker/peixsec_worker.py peixsec_worker.py
 
-ENTRYPOINT python3 peixsec.py
+ENTRYPOINT python3 peixsec_worker.py

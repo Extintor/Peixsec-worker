@@ -7,7 +7,7 @@ import pika
 from pymongo import MongoClient
 
 
-logging.basicConfig(filename='peixsec.log', level=logging.INFO,
+logging.basicConfig(filename='peixsec_worker.log', level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -39,13 +39,11 @@ def process_position(fen_position: str, stockfish: subprocess.Popen, positions) 
                        "best_move": best_move,
                        "tags": ["position"],
                        "date": datetime.datetime.utcnow()}
-    logger.info("Inserted {}".format(positions.insert_one(position_object)))
+    position_id = positions.insert_one(position_object).inserted_id
+    logger.info("Inserted id: {}".format(position_id))
 
 
 def main() -> None:
-    logger.info([os.environ.get('DB_USER')])
-    logger.info([os.environ.get('DB_PASSWORD')])
-
     stockfish = subprocess.Popen(
         'stockfish', universal_newlines=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=1,
     )
@@ -66,6 +64,7 @@ def main() -> None:
     # TODO pass rabbitmq domain name as an env variable
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq-service'))
     channel = connection.channel()
+
     # TODO pass queue name as an env variable
     channel.queue_declare(queue='position_request', durable=True, exclusive=False, auto_delete=False)
     channel.basic_consume(

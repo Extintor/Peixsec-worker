@@ -4,6 +4,6 @@ python:
 install:
  - pip install -r requirements.txt -r test-requirements.txt
 script:
-  - python -m pytest --cov=peixsec
+  - python -m pytest --cov=peixsec_worker
 after_success:
   - codecov
